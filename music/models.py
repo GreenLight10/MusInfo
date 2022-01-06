@@ -1,6 +1,6 @@
 import operator
 from calendar import monthrange
-from datetime import datetime
+
 
 from django.conf import settings
 
@@ -10,7 +10,7 @@ from django.db import connection
 from django.db.models.signals import post_save, pre_save
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from django.utils import timezone
+
 from django.utils.safestring import mark_safe
 
 from utils import upload_function
@@ -63,10 +63,12 @@ class Artist(models.Model):
     members = models.ManyToManyField(Member, verbose_name='Участник', related_name='artist')
     slug = models.SlugField()
     description = models.TextField(verbose_name='Описание', default='Описание появится позже')
-    exist_data = models.DateField(verbose_name='Дата создания')
     image = models.ImageField(upload_to=upload_function)
     def __str__(self):
         return f"{self.name} | {self.genre.name}"
+
+    def get_absolute_url(self):
+        return reverse('artist_detail', kwargs={'artist_slug': self.slug})
     
     class Meta:
         verbose_name = 'Исполнитель'
@@ -83,8 +85,11 @@ class Album(models.Model):
 
 
     def __str__(self):
-        return f"{self.id} | {self.name} | {self.artist.name}"
+        return f"{self.id} | {self.artist.name} | {self.name}"
     
+    def get_absolute_url(self):
+        return reverse('album_detail', kwargs={'artist_slug': self.artist.slug, 'album_slug': self.slug})
+
     class Meta:
         verbose_name = 'Альбом'
         verbose_name_plural = 'Альбомы'
@@ -100,6 +105,9 @@ class ImageGallery(models.Model):
 
     def __str__(self):
         return f"Изображение для {self.content_object}"
+
+    def image_url(self):
+        return mark_safe(f'<img src="{self.image.url}" width="auto" height="200px"')
 
     class Meta:
         verbose_name = 'Галерея изображений'

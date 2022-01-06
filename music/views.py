@@ -1,11 +1,27 @@
 from django.shortcuts import render
 from django.views import generic
 from django.utils import timezone
-# Create your views here.
-class IndexView(generic.ListView):
-    def index(request):
-        return render(request, 'music/index.html')
+from django import views
 
-class AboutView(generic.ListView):
-    def about(request):
-        return render(request, 'music/about.html')
+from .models import Artist, Album
+# Create your views here.
+
+class BaseView(views.View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'base.html', {})
+
+
+class ArtistDetailView(views.generic.DetailView):
+
+    model = Artist
+    template_name = 'artist/artist_detail.html'
+    slug_url_kwarg = 'artist_slug'
+    context_object_name = 'artist'
+
+
+class AlbumDetailView(views.generic.DetailView):
+
+    model = Album
+    template_name = 'album/album_detail.html'
+    slug_url_kwarg = 'album_slug'
+    context_object_name = 'album'
