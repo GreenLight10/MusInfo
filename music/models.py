@@ -47,9 +47,13 @@ class Genre(models.Model):
     name = models.CharField(max_length=50, verbose_name='Название жанра')
     slug = models.SlugField()
     description = models.TextField(verbose_name='Описание', default='Описание появится позже')
+    image = models.ImageField(upload_to=upload_function, null=True, blank=True)
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('genre_detail', kwargs={'genre_slug': self.slug})
     
     class Meta:
         verbose_name = 'Жанр'
@@ -61,9 +65,10 @@ class Artist(models.Model):
     name = models.CharField(max_length=255, verbose_name='Исполнитель/группа')
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
     members = models.ManyToManyField(Member, verbose_name='Участник', related_name='artist')
+    image_gallery = GenericRelation('imagegallery')
     slug = models.SlugField()
     description = models.TextField(verbose_name='Описание', default='Описание появится позже')
-    image = models.ImageField(upload_to=upload_function)
+    image = models.ImageField(upload_to=upload_function, null=True, blank=True)
     def __str__(self):
         return f"{self.name} | {self.genre.name}"
 
@@ -79,7 +84,7 @@ class Album(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE, verbose_name='Исполнитель')
     name = models.CharField(max_length=255, verbose_name='Название альбома')
     songs_list = models.TextField(verbose_name='Трэклист')
-    release_data = models.DateField(verbose_name='Дата релиза')
+    release_date = models.DateField(verbose_name='Дата релиза')
     slug = models.SlugField()
     image = models.ImageField(upload_to=upload_function)
 

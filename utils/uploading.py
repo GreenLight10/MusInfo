@@ -16,6 +16,10 @@ class ImageUpLoadHelper:
         'Album': {
             'field': 'slug',
             'upload_postfix': 'albums_images'
+        },
+        'Genre': {
+            'field': 'slug',
+            'upload_postfix': 'genres_images'
         }
     }
     def __init__(self, field_name_to_combine, instance, filename, upload_postfix):

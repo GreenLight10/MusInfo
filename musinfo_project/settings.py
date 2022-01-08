@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'music',
     "crispy_forms",
     "crispy_bootstrap5",
+    'ajax_select',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

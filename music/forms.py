@@ -2,6 +2,14 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.forms import fields
 
+from crispy_forms.bootstrap import InlineCheckboxes
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout
+
+from ajax_select.fields import AutoCompleteField, AutoCompleteSelectField
+
+from .models import Genre
+
 User = get_user_model()
 
 class LoginForm(forms.ModelForm):
@@ -72,3 +80,36 @@ class RegistrationForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'password', 'confirm_password', 'first_name', 'last_name', 'phone', 'email']
+
+
+
+class SearchForm(forms.Form):
+    GENRE_CHOICES = (
+        (g['slug'], g['name']) for g in Genre.objects.all().values('slug', 'name')
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['genre'].label = 'Жанр'
+        self.fields['artist'].help_text = ""
+        self.fields['release_date_from'].label = 'Дата релиза (с)'
+        self.fields['release_date_to'].label = 'Дата релиза (по)'
+
+        self.helper = FormHelper()
+        self.helper.form_class = 'form-check form-check-inline'
+        self.helper.layout = Layout(InlineCheckboxes(['genre']))
+    
+    artist = AutoCompleteSelectField('artist', required=False, help_text='Начните набор текста, чтобы увидеть результат')
+    genre = forms.MultipleChoiceField(choices=GENRE_CHOICES, widget=forms.CheckboxSelectMultiple, required=False)
+    release_date_from = forms.DateField(
+        widget=forms.TextInput(
+            attrs={'type': 'date'}
+        ),
+        required=False
+    )
+    release_date_to = forms.DateField(
+        widget=forms.TextInput(
+            attrs={'type': 'date'}
+        ),
+        required=False
+    )

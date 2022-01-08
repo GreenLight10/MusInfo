@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+        <h4 class="text-center">Жанры</h4>
+        <hr>
+        <div class="col-md-12">
+          <div class="row">
+            {% for genre in genres %}
+                    <div class="card col-md-3 p-0 mb-3 mt-3">
+
+                        <img src="{{ genre.image.url }}" class="card-img-top">
+                        <div class="card-body text-center">
+                        <h5 class="card-title"><a href="{{ genre.get_absolute_url }}" class="text-decoration-none">
+                            {{ genre.name }}
+                        </a></h5>
+                        </div>
+                        
+                    </div>
+            {% endfor %}
+
+          </div>
+        </div>
+        {% endblock content %}

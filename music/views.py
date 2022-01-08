@@ -1,17 +1,41 @@
 from django.shortcuts import render
 from django.views import generic
 from django.utils import timezone
-from django import views
+from django import forms, views
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login
+from django.db.models import Q
 
-from .models import Artist, Album
-from .forms import LoginForm, RegistrationForm
+from .models import *
+from .forms import LoginForm, RegistrationForm, SearchForm
 # Create your views here.
 
 class BaseView(views.View):
     def get(self, request, *args, **kwargs):
-        return render(request, 'base.html', {})
+        albums = Album.objects.all().order_by('-id')[:5]
+        context = {
+            'albums': albums,
+        }
+
+        return render(request, 'base.html', context)
+
+class ArtistsView(views.View):
+    def get(self, request, *args, **kwargs):
+        artists = Artist.objects.all().order_by('-id')[:5]
+        context = {
+            'artists': artists,
+        }
+
+        return render(request, 'artists.html', context)
+
+class GenresView(views.View):
+    def get(self, request, *args, **kwargs):
+        genres = Genre.objects.all().order_by('-id')[:5]
+        context = {
+            'genres': genres,
+        }
+
+        return render(request, 'genres.html', context)
 
 
 class ArtistDetailView(views.generic.DetailView):
@@ -20,6 +44,12 @@ class ArtistDetailView(views.generic.DetailView):
     template_name = 'artist/artist_detail.html'
     slug_url_kwarg = 'artist_slug'
     context_object_name = 'artist'
+    # def get(self, request, *args, **kwargs):
+    #     artists = Artist.objects.all().order_by('-id')[:5]
+    #     context = {
+    #         'artists': artists,
+    #     }
+    #     return render(request, 'artist/artist_detail.html', context)
 
 
 class AlbumDetailView(views.generic.DetailView):
@@ -28,6 +58,14 @@ class AlbumDetailView(views.generic.DetailView):
     template_name = 'album/album_detail.html'
     slug_url_kwarg = 'album_slug'
     context_object_name = 'album'
+
+class GenreDetailView(views.generic.DetailView):
+
+    model = Genre
+    template_name = 'genre/genre_detail.html'
+    slug_url_kwarg = 'genre_slug'
+    context_object_name = 'genre'
+
 
 
 class LoginView(views.View):
@@ -80,3 +118,42 @@ class RegistrationView(views.View):
             'form': form
         }
         return render(request, 'registration.html', context)
+
+
+class SearchView(views.View):
+
+    def get(self, request, *args, **kwargs):
+        form = SearchForm(request.GET)
+        results = None
+        if form.is_valid():
+            q = Q()
+            artist = form.cleaned_data['artist']
+            if artist:
+                q.add(Q(**{'artist': artist}), Q.AND)
+            genre = form.cleaned_data['genre']
+            if genre:
+                if len(genre) == 1:
+                    q.add(Q(**{'artist__genre__slug': genre[0]}), Q.AND)
+                else:
+                    q.add(Q(**{'artist__genre__slug__in': genre}), Q.AND)
+            release_date_from = form.cleaned_data['release_date_from']
+            if release_date_from:
+                q.add(Q(**{'release_date__gte': release_date_from}), Q.AND)
+            release_date_to = form.cleaned_data['release_date_to']
+            if release_date_to:
+                q.add(Q(**{'release_date__lte': release_date_to}), Q.AND)
+            
+            if q:
+                results = Album.objects.filter(q)
+            else:
+                results = Album.objects.none()
+                
+        context = {
+            'form': form
+        }
+
+        if results and results.exists():
+            context.update({'results': results})
+            
+        return render(request, 'search.html', context)
+        
