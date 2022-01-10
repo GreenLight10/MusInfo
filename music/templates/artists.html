@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% block title %}Исполнители{% endblock title %}
 {% block content %}
-        <h4 class="text-center">Исполнители</h4>
+        <h4 class="text-center mt-3">Исполнители</h4>
         <hr>
         <div class="col-md-12">
           <div class="row">
-            {% for artist in artists %}
+            {% for artist in page_obj %}
                     <div class="card col-md-3 p-0 mb-3 mt-3">
 
                         <img src="{{ artist.image.url }}" class="card-img-top">
@@ -21,6 +22,30 @@
 
                     </div>
             {% endfor %}
+
+            <nav aria-label="...">
+              <ul class="pagination" class="text-center">
+                  {% if page_obj.has_previous %}
+                  <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.previous_page_number }}" tabindex="-1" aria-disabled="true">Предыдущая</a>
+                  </li>
+                  <li class="page-item">
+                      <a class="page-link" href="?page=1">1</a>
+                  </li>
+                  {% endif %}
+                <li class="page-item active" aria-current="page">
+                  <a class="page-link" href="{{ page_obj.number }}">{{ page_obj.number }}</a>
+                </li>
+                  {% if page_obj.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                    </li>
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующее</a>  
+                    </li>
+                  {% endif %}
+              </ul>
+            </nav>
 
           </div>
         </div>

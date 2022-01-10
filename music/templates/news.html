@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Новости{% endblock title %}
+{% block content %}
+        <h4 class="text-center mt-3">Новости</h4>
+        <hr>
+        <div class="col-md-12">
+          <div class="row">
+            {% for new in news %}
+                    <div class="card col-md-3 p-0 mb-3 mt-3">
+
+                        <div class="card-body text-center">
+                        <h5 class="card-title"><a href="{{ new.get_absolute_url }}" class="text-decoration-none">
+                            {{ new.title }}
+                        </a></h5>
+                        </div>
+
+                        <ul class="list-group list-group-flush text-center">
+                          <li class="list-group-item"><strong>{{ new.anons }}</strong></li>
+                          <li class="list-group-item">Дата выхода: <strong>{{ new.date|date:"d-m-Y" }}</strong></li>
+                        </ul>
+
+                    </div>
+            {% endfor %}
+
+          </div>
+        </div>
+        {% endblock content %}

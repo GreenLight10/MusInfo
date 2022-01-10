@@ -117,3 +117,22 @@ class ImageGallery(models.Model):
     class Meta:
         verbose_name = 'Галерея изображений'
         verbose_name_plural = verbose_name
+
+
+class News(models.Model):
+    """Новости"""
+    title = models.CharField(max_length=100, verbose_name='Заголовок')
+    slug = models.SlugField(default='news-1')
+    anons = models.CharField(max_length=250, verbose_name='Краткое описание')
+    description = models.TextField(verbose_name='Текст новости', default='Текст появится позже')
+    date = models.DateField(verbose_name='Дата публикации')
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse('new_detail', kwargs={'new_slug': self.slug})
+    
+    class Meta:
+        verbose_name = 'Новость'
+        verbose_name_plural = 'Новости'

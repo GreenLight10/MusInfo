@@ -1,3 +1,4 @@
+from django.core import paginator
 from django.shortcuts import render
 from django.views import generic
 from django.utils import timezone
@@ -5,6 +6,8 @@ from django import forms, views
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 from django.db.models import Q
+from django.views.generic import ListView
+from django.core.paginator import Paginator
 
 from .models import *
 from .forms import LoginForm, RegistrationForm, SearchForm
@@ -12,30 +15,58 @@ from .forms import LoginForm, RegistrationForm, SearchForm
 
 class BaseView(views.View):
     def get(self, request, *args, **kwargs):
-        albums = Album.objects.all().order_by('-id')[:5]
+        import random
+        genres = random.sample(list(Genre.objects.all()), 4)
+        artists = random.sample(list(Artist.objects.all()), 4)
         context = {
-            'albums': albums,
+            'genres': genres,
+            'artists': artists,
         }
 
         return render(request, 'base.html', context)
 
-class ArtistsView(views.View):
+class ArtistsView(ListView):
     def get(self, request, *args, **kwargs):
-        artists = Artist.objects.all().order_by('-id')[:5]
+        artists = Artist.objects.all().order_by('name')
+        paginator = Paginator(artists, 8)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
         context = {
             'artists': artists,
+            'page_obj': page_obj,
         }
 
         return render(request, 'artists.html', context)
 
-class GenresView(views.View):
+class GenresView(ListView):
     def get(self, request, *args, **kwargs):
-        genres = Genre.objects.all().order_by('-id')[:5]
+        genres = Genre.objects.all().order_by('name')
+        paginator = Paginator(genres, 8)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
         context = {
             'genres': genres,
+            'page_obj': page_obj,
         }
 
         return render(request, 'genres.html', context)
+
+class NewsView(views.View):
+    def get(self, request, *args, **kwargs):
+        news = News.objects.all().order_by('-date')
+        context = {
+            'news': news,
+        }
+
+        return render(request, 'news.html', context)
+
+
+class NewDetailView(views.generic.DetailView):
+
+    model = News
+    template_name = 'new/new_detail.html'
+    slug_url_kwarg = 'new_slug'
+    context_object_name = 'new'
 
 
 class ArtistDetailView(views.generic.DetailView):
